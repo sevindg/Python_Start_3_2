@@ -139,7 +139,7 @@ kbd{font-family:inherit;border:1px solid var(--line);border-bottom-width:2px;bor
 .res-card{display:flex;flex-direction:column;overflow:hidden}
 .live{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-l)}
 .res-top b{font-size:12.5px;letter-spacing:.06em}
-.res-top select{font-family:inherit;font-weight:700;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:5px 8px;background:#fff;color:var(--ink);max-width:190px}
+.io-hint{font-size:12px;font-weight:700;color:#2b6cb0;background:#e8f2fd;border:1px solid #c7e0f7;border-radius:999px;padding:3px 10px;white-space:nowrap}
 .termwrap{background:#0f1b33}
 .term-out{padding:16px 18px;min-height:300px;max-height:430px;overflow:auto;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.65;color:#d8f5e6;white-space:pre-wrap;word-break:break-word}
 .term-out .op{color:#5d7fa8;margin-right:8px}
@@ -308,7 +308,7 @@ kbd{font-family:inherit;border:1px solid var(--line);border-bottom-width:2px;bor
         <div class="res-top">
           <span class="live"></span><b>РЕЗУЛЬТАТ ПРОГРАММЫ</b>
           <span class="sp"></span>
-          <select id="scenario" class="hidden" title="Сценарий запуска"></select>
+          <span class="io-hint hidden" id="ioHint">💬 при запуске появится окно ввода</span>
         </div>
         <div class="termwrap"><div class="term-out" id="console"></div></div>
         <div class="verdict" id="verdict"></div>
@@ -525,7 +525,7 @@ const XP_MISSION = 20, XP_QUIZ = 5;
    СОСТОЯНИЕ
    ===================================================================== */
 const KEY = 'python_start_lesson3_task2_v2';
-function defaults(){ return {tab:'quiz', cur:0, xp:0, done:{}, code:{}, hints:{}, quiz:{idx:0, answers:{}, xpGiven:{}, finished:false}, muted:false, font:15, name:'', scenario:{}}; }
+function defaults(){ return {tab:'quiz', cur:0, xp:0, done:{}, code:{}, hints:{}, quiz:{idx:0, answers:{}, xpGiven:{}, finished:false}, muted:false, font:15, name:''}; }
 let state = defaults();
 try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s) state = Object.assign(defaults(), s); } catch(e) {}
 let saveTimer = 0;
@@ -540,26 +540,34 @@ function skRead(x){
   return Sk.builtinFiles.files[x];
 }
 let runChain = Promise.resolve();
-function runPy(code, inputs){
-  const p = runChain.then(() => runPyNow(code, inputs));
+function runPy(code, inputs, interactive){
+  const p = runChain.then(() => runPyNow(code, inputs, interactive));
   runChain = p.catch(() => {});
   return p;
 }
-async function runPyNow(code, inputs){
+async function runPyNow(code, inputs, interactive){
   let out = '';
   if (!PY_OK) return {output:'', error:{custom:true, title:'Python не загрузился', text:'Для работы тренажёра нужен интернет: Python подключается из сети. Проверь подключение и обнови страницу.'}};
   const savedPrompt = window.prompt;
   const queue = (inputs || []).slice();
-  window.prompt = function(){ return queue.length ? queue.shift() : ''; };
   Sk.configure({output: s => { out += s; }, read: skRead, __future__: Sk.python3, execLimit: 6000, yieldLimit: 100});
+  /* вопрос из input() показываем прямо в окне ввода */
+  Sk.inputfunTakesPrompt = true;
+  /* «Проверить» — ответы подставляются молча из тестов,
+     «Запустить» — открывается настоящее окно ввода, как в Python */
+  Sk.inputfun = function(promptText){
+    if (interactive) {
+      const v = savedPrompt ? savedPrompt(promptText || '') : '';
+      return v === null ? '0' : v;
+    }
+    return queue.length ? queue.shift() : '';
+  };
   try {
     Sk.execStart = Date.now();
     await Sk.misceval.asyncToPromise(() => Sk.importMainWithBody('<stdin>', false, code, true));
     return {output: out, error: null};
   } catch (e) {
     return {output: out, error: e};
-  } finally {
-    window.prompt = savedPrompt;
   }
 }
 
@@ -732,7 +740,10 @@ $('#resetCode').onclick = () => {
 const con = $('#console'), verdictEl = $('#verdict');
 const MASCOT = (size = 64) => `<svg class="mascot" width="${size}" height="${size}" viewBox="0 0 64 64"><rect x="8" y="12" width="48" height="40" rx="10" fill="#20c997"/><rect x="14" y="20" width="36" height="24" rx="6" fill="#0f1b33"/><circle cx="23" cy="32" r="3.5" fill="#69f0ae"/><circle cx="32" cy="32" r="3.5" fill="#ffd43b"/><circle cx="41" cy="32" r="3.5" fill="#ff8fa3"/><rect x="24" y="54" width="16" height="3" rx="1.5" fill="#0ca678"/></svg>`;
 function conPlaceholder(){
-  con.innerHTML = `<div class="placeholder">${MASCOT(52)}<div>Нажми «<b style="color:#8fd4ff">▶ Запустить код</b>» или «<b style="color:#7cf0c4">✔ Проверить решение</b>».<br><span class="muted">Здесь появится то, что напечатает программа, и результат проверки.</span></div></div>`;
+  const io = usesInput(state.cur)
+    ? '<br><span class="muted">💬 Программа спросит данные — при запуске появится окно ввода: впиши ответ и нажми «OK».</span>'
+    : '';
+  con.innerHTML = `<div class="placeholder">${MASCOT(52)}<div>Нажми «<b style="color:#8fd4ff">▶ Запустить код</b>» или «<b style="color:#7cf0c4">✔ Проверить решение</b>».<br><span class="muted">Здесь появится то, что напечатает программа, и результат проверки.</span>${io}</div></div>`;
 }
 function conClear(){ con.innerHTML = ''; verdictEl.innerHTML = ''; }
 function conLine(html){ const d = document.createElement('div'); d.innerHTML = html; con.appendChild(d); con.scrollTop = con.scrollHeight; return d; }
@@ -752,13 +763,12 @@ function renderOutput(r, code){
 
 let busy = false, runToken = 0;
 function setBusy(b){ busy = b; $('#runBtn').disabled = $('#checkBtn').disabled = b; }
-function testSet(ti, k){
-  const t = TASKS[ti], tests = (t.tests && t.tests.length) ? t.tests : [[]];
-  return tests[Math.min(k, tests.length - 1)];
+function usesInput(ti){
+  const t = TASKS[ti];
+  return /\binput\s*\(/.test(t.starter || '') || !!((t.tests || []).some(x => x.length));
 }
-function scenarioIdx(ti){
-  const t = TASKS[ti], n = (t.tests && t.tests.length) || 1;
-  return Math.min(Math.max(+(state.scenario[ti] || 0), 0), n - 1);
+function renderIoHint(){
+  $('#ioHint').classList.toggle('hidden', !usesInput(state.cur));
 }
 
 async function doRun(isCheck){
@@ -778,9 +788,8 @@ async function doRun(isCheck){
         labels.push((t.testLabels && t.testLabels[k]) || '');
       }
     } else {
-      const k = scenarioIdx(ti);
-      results.push(await runPy(code, testSet(ti, k).slice()));
-      labels.push((t.testLabels && t.testLabels[k]) || '');
+      /* обычный запуск: если программа просит данные — откроется окно ввода */
+      results.push(await runPy(code, [], true));
     }
   } finally {
     setBusy(false);
@@ -835,21 +844,13 @@ function renderMissions(){
   });
   const on = L.querySelector('.on'); if (on) on.scrollIntoView({block:'nearest', inline:'nearest'});
 }
-function renderScenario(){
-  const t = TASKS[state.cur], sel = $('#scenario');
-  sel.innerHTML = '';
-  if (!t.tests || t.tests.length < 2) { sel.classList.add('hidden'); return; }
-  t.testLabels.forEach((l, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${esc(l)}</option>`));
-  sel.value = String(scenarioIdx(state.cur));
-  sel.classList.remove('hidden');
-}
 function selectMission(i, keepTab){
   state.cur = i; save();
   const t = TASKS[i];
   $('#mTitle').textContent = t.title; $('#mGoal').textContent = t.goal;
   ta.value = state.code[i] != null ? state.code[i] : t.starter;
   errLine = null; refreshEditor(); ta.scrollTop = 0; syncScroll();
-  renderMissions(); renderScenario(); renderDrawer();
+  renderMissions(); renderIoHint(); renderDrawer();
   runToken++; conPlaceholder(); verdictEl.innerHTML = '';
   if (!keepTab && state.tab !== 'code') setTab('code');
 }
@@ -939,7 +940,7 @@ function setTab(tab){
   $('#quizView').classList.toggle('hidden', tab !== 'quiz');
   $('#codeView').classList.toggle('hidden', tab !== 'code');
   $('#sideTab').classList.toggle('hidden', tab !== 'code');
-  if (tab === 'code') renderScenario(); else renderQuiz();
+  if (tab === 'code') renderIoHint(); else renderQuiz();
 }
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
 function updateHeader(){
@@ -954,7 +955,6 @@ $('#resetAll').onclick = () => {
   state = defaults(); try { localStorage.removeItem(KEY); } catch (e) {}
   init();
 };
-$('#scenario').onchange = e => { state.scenario[state.cur] = +e.target.value; save(); if (!busy) doRun(false); };
 
 let actx = null;
 function beep(kind){

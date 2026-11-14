@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Условный оператор — тренажёр Python для детей</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef3f9; --card:#fff; --ink:#1e2a45; --muted:#7a869f; --line:#e3e9f2;
+  --green:#12b886; --green-d:#0c9a70; --green-l:#e6f8f1;
+  --yellow:#ffc53d; --yellow-l:#fff6dc; --purple:#7c4dff; --purple-l:#f1ebff;
+  --red:#f03e3e; --red-l:#fff0f0; --blue:#3b82f6; --blue-l:#eaf2ff;
+  --code-size:15px; --r:18px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Nunito,system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+/* операторы должны выглядеть как в коде: != <= >= ==, без лигатур ≠ ≤ ≥ */
+.code-wrap pre,.code-wrap textarea,code,.expected,.term-out,.hchip,.file,.gutter,.q-left pre,.cheat code{
+  font-variant-ligatures:none!important;
+  font-feature-settings:"liga" 0,"calt" 0,"dlig" 0!important;
+}
+.muted{color:var(--muted)}
+.card{background:var(--card);border-radius:var(--r);box-shadow:0 2px 0 rgba(30,42,69,.04),0 8px 24px rgba(30,42,69,.06)}
+
+/* ---------- header ---------- */
+.top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 20px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:12px;margin-right:auto}
+.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#20c997,#0ca678);display:grid;place-items:center;box-shadow:0 4px 12px rgba(18,184,134,.35);font-size:26px;line-height:1}
+.brand-title{font-weight:900;font-size:21px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--green-d);background:var(--green-l);border:1px solid #b2ecd9;padding:3px 8px;border-radius:999px}
+.brand-sub{font-size:12.5px;color:var(--muted)}
+.tabs{display:flex;background:#f3f5fa;border:1px solid var(--line);border-radius:999px;padding:4px;gap:2px}
+.tabs button{border:0;background:transparent;padding:8px 14px;border-radius:999px;font-weight:800;font-size:13px;color:#5b6784}
+.tabs button.on{background:var(--yellow);color:#3a2a00;box-shadow:0 2px 6px rgba(255,197,61,.5)}
+.stats{display:flex;align-items:center;gap:8px}
+.xp{background:var(--yellow-l);border:1px solid #ffe08a;color:#8a5a00;font-weight:900;padding:8px 12px;border-radius:12px;white-space:nowrap}
+.pill{border:1px solid var(--line);background:#fff;padding:8px 12px;border-radius:12px;font-weight:800;font-size:14px;color:var(--ink)}
+.pill:hover{background:#f7f9fc}
+.ico{width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:12px;font-size:16px;display:grid;place-items:center}
+.ico:hover{background:#f7f9fc}
+main{max-width:1320px;margin:0 auto;padding:18px 20px 40px}
+.hidden{display:none!important}
+
+/* ---------- quiz ---------- */
+.quiz{overflow:hidden}
+.q-head{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.q-num{width:40px;height:40px;border-radius:12px;background:var(--yellow-l);border:1px solid #ffe08a;color:#8a5a00;font-weight:900;display:grid;place-items:center;font-size:18px}
+.q-label{font-weight:900;font-size:13px;letter-spacing:.05em}
+.q-score{font-size:13px;color:var(--green-d);font-weight:700}
+.q-dots{display:flex;gap:6px;margin:0 auto}
+.q-dots i{width:22px;height:7px;border-radius:9px;background:#e4e9f2}
+.q-dots i.cur{background:var(--yellow)} .q-dots i.ok{background:var(--green)} .q-dots i.bad{background:#ff8787}
+.ghost{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;font-weight:800;color:#5b6784;font-size:13px}
+.ghost:hover{background:#f7f9fc}
+.q-body{display:grid;grid-template-columns:1.1fr 1fr;min-height:430px}
+.q-left{padding:26px 26px 30px}
+.q-right{background:#f8fafd;border-left:1px solid var(--line);padding:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.q-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px}
+.topic{background:var(--yellow-l);border:1px solid #ffe08a;color:#8a5a00;font-weight:800;padding:4px 10px;border-radius:999px}
+.q-left h2{font-size:28px;margin:22px 0;line-height:1.25}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;border:2px solid var(--line);background:#fff;border-radius:16px;padding:16px;font-size:15.5px;font-weight:700;color:var(--ink);transition:.15s}
+.opt:hover:not(:disabled){border-color:#b9c6dc;transform:translateY(-1px)}
+.opt .let{flex:none;width:26px;height:26px;border-radius:50%;background:#eef2f8;color:#5b6784;display:grid;place-items:center;font-size:12px;font-weight:900}
+.opt code,.q-right code,.dr-body code,.fb code,.exp code{font-family:'JetBrains Mono',monospace;background:#eef2f8;padding:1px 6px;border-radius:6px;font-size:.92em}
+.opt.ok{border-color:var(--green);background:var(--green-l)} .opt.ok .let{background:var(--green);color:#fff}
+.opt.bad{border-color:#ff8787;background:var(--red-l)} .opt.bad .let{background:var(--red);color:#fff}
+.opt:disabled{cursor:default}
+.q-right h3{margin:12px 0 6px;font-size:20px}
+.q-right p{margin:0 0 16px;color:#4b5774;line-height:1.5;max-width:380px}
+.btn{border:0;border-radius:14px;padding:14px 22px;font-weight:900;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.15s}
+.btn:active{transform:translateY(1px)}
+.btn.green{background:linear-gradient(180deg,#20c997,#0ca678);color:#fff;box-shadow:0 4px 0 #087f5b}
+.btn.green:hover{filter:brightness(1.05)}
+.btn.white{background:#fff;color:var(--blue);border:2px solid #cfe0ff}
+.btn.white:hover{background:var(--blue-l)}
+.btn:disabled{opacity:.6;cursor:wait}
+.mascot{animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.finish{padding:40px 26px;text-align:center}
+.finish h2{font-size:30px;margin:12px 0 6px}
+.finish .big{font-size:56px;font-weight:900;color:var(--green-d);margin:8px 0}
+
+/* ---------- missions ---------- */
+.missions{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.m-label{font-weight:900;font-size:13px;color:#5b6784;white-space:nowrap;letter-spacing:.04em}
+.m-list{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:thin}
+.chip{flex:none;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:7px 12px 7px 7px;font-weight:800;font-size:13.5px;color:var(--ink)}
+.chip .n{width:24px;height:24px;border-radius:50%;background:#eef2f8;display:grid;place-items:center;font-size:12px;font-weight:900;color:#5b6784}
+.chip.done .n{background:var(--green-l);color:var(--green-d)}
+.chip.on{background:linear-gradient(180deg,#20c997,#0ca678);color:#fff;border-color:transparent;box-shadow:0 3px 0 #087f5b}
+.chip.on .n{background:#fff;color:var(--green-d)}
+.m-bar{display:flex;align-items:center;gap:16px;padding:14px 16px;margin-bottom:14px;flex-wrap:wrap}
+.taskbtn{border:1px solid #cfe0ff;background:var(--blue-l);color:#1d4ed8;font-weight:800;border-radius:12px;padding:11px 16px;font-size:14.5px;white-space:nowrap}
+.taskbtn:hover{background:#dce9ff}
+.m-title{flex:1;min-width:220px}
+.m-title b{font-size:17px}
+.m-goal{font-size:13.5px;color:#4b5774;margin-top:2px}
+.m-goal span:first-child{color:var(--green-d);font-weight:800}
+.m-tip{display:flex;align-items:center;gap:10px;background:var(--green-l);border:1px solid #b2ecd9;border-radius:14px;padding:10px 14px;font-size:14px;font-weight:700;max-width:430px}
+
+/* ---------- workspace ---------- */
+.work{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.ed-card{display:flex;flex-direction:column;overflow:hidden;height:100%}
+.ed-top,.res-top{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);min-height:52px}
+.dots{display:flex;gap:6px}.dots i{width:11px;height:11px;border-radius:50%;background:#ff6b6b}.dots i:nth-child(2){background:#ffd43b}.dots i:nth-child(3){background:#51cf66}
+.file{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;background:var(--green-l);color:var(--green-d);padding:5px 10px;border-radius:9px}
+.sp{flex:1}
+.small{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 10px;font-weight:800;font-size:13px;color:#4b5774}
+.small:hover{background:#f7f9fc}
+.small.on{background:var(--green-l);border-color:#b2ecd9;color:var(--green-d)}
+.helpers{display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap;font-size:12.5px}
+.hchip{font-family:'JetBrains Mono',monospace;font-size:12px;border:1px solid;border-radius:8px;padding:3px 8px;background:#fff;font-weight:600}
+.hchip:nth-child(4n+2){color:#0c9a70;border-color:#b2ecd9;background:#f0fbf7}
+.hchip:nth-child(4n+3){color:#b07800;border-color:#ffe08a;background:#fffaeb}
+.hchip:nth-child(4n){color:#1d6fd8;border-color:#cfe0ff;background:#f3f8ff}
+.hchip:nth-child(4n+1){color:#7c3aed;border-color:#ddd0ff;background:#f8f5ff}
+.hchip:hover{filter:brightness(.96)}
+.editor{position:relative;display:flex;flex:1;min-height:440px;background:#fbfcfe}
+.gutter{flex:none;width:46px;padding:14px 8px 14px 0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:var(--code-size);line-height:1.65;color:#aab4c6;background:#f4f7fb;border-right:1px solid var(--line);overflow:hidden;white-space:pre;user-select:none}
+.gutter .e{color:#fff;background:var(--red);border-radius:0 6px 6px 0;display:inline-block;width:100%;padding-right:2px}
+.code-wrap{position:relative;flex:1;min-width:0}
+.code-wrap pre,.code-wrap textarea{position:absolute;inset:0;margin:0;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:var(--code-size);line-height:1.65;white-space:pre;tab-size:4;border:0;letter-spacing:0;word-spacing:0}
+.code-wrap pre{overflow:hidden;color:#1e2a45;pointer-events:none}
+.code-wrap textarea{background:transparent;color:transparent;caret-color:#1e2a45;resize:none;outline:none;overflow:auto}
+.code-wrap textarea::selection{background:rgba(59,130,246,.25)}
+.t-kw{color:#c2255c;font-weight:600}.t-str{color:#e67700}.t-num{color:#1c7ed6}.t-com{color:#94a0b8;font-style:italic}.t-fn{color:#0c9a70;font-weight:600}.t-call{color:#7048e8}
+.errline{display:inline-block;min-width:100%;background:#ffe3e3;vertical-align:top}
+.ed-foot{display:flex;justify-content:space-between;gap:10px;padding:8px 14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);flex-wrap:wrap}
+kbd{font-family:inherit;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:#fff;font-size:11px}
+
+/* ---------- result panel ---------- */
+.res-card{display:flex;flex-direction:column;overflow:hidden}
+.live{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-l)}
+.res-top b{font-size:12.5px;letter-spacing:.06em}
+.res-top select{font-family:inherit;font-weight:700;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:5px 8px;background:#fff;color:var(--ink);max-width:190px}
+.termwrap{background:#0f1b33}
+.term-out{padding:16px 18px;min-height:300px;max-height:430px;overflow:auto;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.65;color:#d8f5e6;white-space:pre-wrap;word-break:break-word}
+.term-out .op{color:#5d7fa8;margin-right:8px}
+.term-out .t-info{color:#9fb3d1;font-family:Nunito;font-weight:700;font-size:13.5px}
+.term-out .t-ok{color:#69f0ae;font-family:Nunito;font-weight:800}
+.term-out .t-label{display:inline-block;color:#ffd43b;font-family:Nunito;font-weight:900;font-size:12.5px;letter-spacing:.04em;margin:6px 0 4px}
+.term-out .t-sep{border-top:1px dashed rgba(159,179,209,.25);margin:8px 0}
+.errbox{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.45);border-radius:12px;padding:10px 12px;margin:8px 0;color:#ffd0d0;font-family:Nunito;font-weight:700}
+.errbox b{color:#ff9b9b}
+.errbox .raw{font-family:'JetBrains Mono',monospace;font-size:12px;color:#ffb3b3;margin-top:4px;opacity:.85}
+.verdict{display:flex;flex-direction:column;gap:8px;padding:12px 14px 0}
+.verdict:empty{display:none}
+.actions{display:grid;grid-template-columns:1fr 1.4fr;gap:12px;padding:12px 14px}
+.actions .btn{padding:14px 10px}
+.placeholder{display:flex;align-items:center;gap:14px;color:#c3d3e8;font-weight:700;font-size:14px}
+.placeholder .muted{color:#7f95b3}
+.fb{display:flex;gap:14px;align-items:flex-start;border-radius:14px;padding:14px;margin:6px 0;color:var(--ink)}
+.fb.good{background:var(--green-l);border:1px solid #96e2c7}
+.fb.bad{background:#fff8e6;border:1px solid #ffe08a}
+.fb h4{margin:0 0 4px;font-size:17px}
+.fb p{margin:0 0 8px;line-height:1.45}
+.fb .btn{padding:10px 16px;font-size:14px;margin-top:4px}
+
+/* ---------- drawer ---------- */
+.side-tab{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:15;writing-mode:vertical-rl;rotate:180deg;background:var(--blue);color:#fff;border:0;border-radius:0 12px 12px 0;padding:14px 8px;font-weight:900;letter-spacing:.12em;font-size:12px;box-shadow:0 4px 14px rgba(59,130,246,.4)}
+.dr-bg{position:fixed;inset:0;background:rgba(20,30,50,.35);z-index:40;opacity:0;pointer-events:none;transition:.2s}
+.dr-bg.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:min(470px,94vw);background:#fff;z-index:41;transform:translateX(-102%);transition:.25s;display:flex;flex-direction:column;box-shadow:8px 0 30px rgba(0,0,0,.15)}
+.drawer.on{transform:none}
+.dr-head{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.dr-head b{font-size:18px;flex:1}
+.dr-body{padding:16px 18px 30px;overflow:auto;line-height:1.5}
+.dr-body h4{margin:18px 0 8px;font-size:15px}
+.story{background:var(--purple-l);border:1px solid #ddd0ff;border-radius:14px;padding:12px 14px;margin:0}
+.dr-body ul{margin:0;padding-left:20px}
+.dr-body li{margin:4px 0}
+.expected{background:#0f1b33;border-radius:14px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:13.5px;color:#d8f5e6;line-height:1.6}
+.exp-lbl{display:inline-block;color:#ffd43b;font-family:Nunito;font-weight:900;font-size:11.5px;letter-spacing:.05em;margin:8px 0 2px;text-transform:uppercase}
+.exp-lbl:first-child{margin-top:0}
+.exp-line .op{color:#5d7fa8;margin-right:8px}
+.hint{background:var(--yellow-l);border:1px solid #ffe08a;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:14.5px}
+.cheat{width:100%;border-collapse:collapse;font-size:13.5px}
+.cheat td{padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+.cheat td:first-child{white-space:nowrap}
+.cheat code{font-family:'JetBrains Mono',monospace;background:#eef2f8;padding:1px 6px;border-radius:6px;font-size:.92em}
+
+/* ---------- modal ---------- */
+.modal-bg{position:fixed;inset:0;background:rgba(20,30,50,.45);z-index:50;display:grid;place-items:center;padding:16px}
+.modal{background:#fff;border-radius:22px;max-width:640px;width:100%;padding:22px;max-height:92vh;overflow:auto}
+.modal h3{margin:0 0 10px;font-size:22px}
+.modal input{font-family:inherit;font-size:16px;border:2px solid var(--line);border-radius:12px;padding:10px 12px;width:100%;margin:6px 0 12px;font-weight:700}
+.cert{border:6px double var(--green);border-radius:18px;padding:26px 20px;text-align:center;background:linear-gradient(180deg,#f3fcf8,#fff)}
+.cert .ct{font-size:13px;letter-spacing:.3em;color:var(--green-d);font-weight:900}
+.cert h2{font-size:32px;margin:6px 0}
+.cert .name{font-size:28px;font-weight:900;border-bottom:2px solid var(--yellow);display:inline-block;padding:4px 18px;margin:10px 0;min-width:200px}
+.cert p{margin:6px 0;color:#4b5774}
+.progressbar{height:12px;background:#eef2f8;border-radius:9px;overflow:hidden;margin:10px 0}
+.progressbar i{display:block;height:100%;background:linear-gradient(90deg,#20c997,#0ca678)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1e2a45;color:#fff;padding:10px 16px;border-radius:12px;font-weight:800;z-index:70;font-size:14px}
+
+@media (max-width:980px){
+  .work{grid-template-columns:1fr}
+  .q-body{grid-template-columns:1fr}
+  .q-right{border-left:0;border-top:1px solid var(--line)}
+  .editor{min-height:340px}
+}
+@media (max-width:640px){
+  main{padding:12px 12px 30px}
+  .top{padding:10px 12px}
+  .opts{grid-template-columns:1fr}
+  .q-left h2{font-size:22px}
+  .m-label{display:none}
+  .actions{grid-template-columns:1fr}
+}
+@media print{
+  body *{visibility:hidden}
+  #certPrint,#certPrint *{visibility:visible}
+  #certPrint{position:fixed;left:0;top:0;width:100%}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <div class="logo">⚡</div>
+    <div>
+      <div class="brand-title">Условный оператор <span class="badge">ТРЕНАЖЁР</span></div>
+      <div class="brand-sub">Python · Урок 3 · Задание 2</div>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button data-tab="quiz">❓ 1. Тест</button>
+    <button data-tab="code">&lt;/&gt; 2. Практика кода (<span id="doneCount">0</span>/<span id="totalCount">5</span>)</button>
+  </nav>
+  <div class="stats">
+    <div class="xp" title="Очки опыта">⭐ <span id="xp">0</span> XP</div>
+    <button class="pill" id="certBtn">🏅 Сертификат</button>
+    <button class="ico" id="soundBtn" title="Звук">🔊</button>
+    <button class="ico" id="resetAll" title="Начать всё заново">↺</button>
+  </div>
+</header>
+
+<main>
+  <!-- ====== QUIZ ====== -->
+  <section id="quizView" class="card quiz">
+    <div class="q-head">
+      <div class="q-num" id="qNum">1</div>
+      <div>
+        <div class="q-label" id="qLabel">ВОПРОС 1 ИЗ 3</div>
+        <div class="q-score">Правильных ответов: <span id="qScore">0</span></div>
+      </div>
+      <div class="q-dots" id="qDots"></div>
+      <button class="ghost" id="toCode">&lt;/&gt; Сразу к практике →</button>
+    </div>
+    <div id="qBody" class="q-body">
+      <div class="q-left">
+        <div class="q-top"><span class="topic" id="qTopic"></span><span class="muted">Выбери один правильный ответ</span></div>
+        <h2 id="qText"></h2>
+        <div class="opts" id="qOpts"></div>
+      </div>
+      <div class="q-right" id="qRight"></div>
+    </div>
+    <div id="qFinish" class="finish hidden"></div>
+  </section>
+
+  <!-- ====== CODE ====== -->
+  <section id="codeView" class="hidden">
+    <div class="missions">
+      <span class="m-label">🗺️ КАРТА МИССИЙ:</span>
+      <div class="m-list" id="mList"></div>
+    </div>
+    <div class="card m-bar">
+      <button class="taskbtn" id="openTask">📖 Задание и подсказки</button>
+      <div class="m-title">
+        <b id="mTitle"></b>
+        <div class="m-goal"><span>Цель:</span> <span id="mGoal"></span></div>
+      </div>
+      <div class="m-tip"><span style="font-size:22px">🤖</span><span>Открой задание, пиши код слева и нажимай «Проверить решение»!</span></div>
+    </div>
+
+    <div class="work">
+      <div class="card ed-card">
+        <div class="ed-top">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="file">main.py</span>
+          <span class="muted" style="font-size:13px" id="lineCount">Строк: 0</span>
+          <span class="sp"></span>
+          <button class="small" id="fontMinus" title="Мельче">A−</button>
+          <button class="small" id="fontPlus" title="Крупнее">A+</button>
+          <button class="small" id="resetCode">↺ Сбросить</button>
+        </div>
+        <div class="helpers" id="helpers"><span class="muted">Помощники:</span></div>
+        <div class="editor">
+          <div class="gutter" id="gutter">1</div>
+          <div class="code-wrap">
+            <pre id="hl" aria-hidden="true"></pre>
+            <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="Код программы"></textarea>
+          </div>
+        </div>
+        <div class="ed-foot"><span>Python 3 · условия · UTF-8</span><span><kbd>Ctrl</kbd>+<kbd>Enter</kbd> — запустить · <kbd>Tab</kbd> — отступ</span></div>
+      </div>
+
+      <div class="card res-card">
+        <div class="res-top">
+          <span class="live"></span><b>РЕЗУЛЬТАТ ПРОГРАММЫ</b>
+          <span class="sp"></span>
+          <select id="scenario" class="hidden" title="Сценарий запуска"></select>
+        </div>
+        <div class="termwrap"><div class="term-out" id="console"></div></div>
+        <div class="verdict" id="verdict"></div>
+        <div class="actions">
+          <button class="btn white" id="runBtn">▶ Запустить код</button>
+          <button class="btn green" id="checkBtn">✔ Проверить решение ✨</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button class="side-tab hidden" id="sideTab">📖 ЗАДАНИЕ</button>
+<div class="dr-bg" id="drBg"></div>
+<aside class="drawer" id="drawer" aria-label="Задание">
+  <div class="dr-head"><b id="drTitle"></b><button class="ico" id="drClose" title="Закрыть">✕</button></div>
+  <div class="dr-body">
+    <p class="story" id="drStory"></p>
+    <h4>📝 Что нужно сделать</h4>
+    <ul id="drReqs"></ul>
+    <h4>🎯 Что должно получиться</h4>
+    <div class="expected" id="drExpected"></div>
+    <h4>💡 Подсказки</h4>
+    <div id="drHints"></div>
+    <button class="small" id="moreHint">💡 Показать подсказку</button>
+    <h4>📚 Шпаргалка по условиям</h4>
+    <table class="cheat">
+      <tr><td><code>if условие:</code></td><td>выполнить команды, если условие истинно (True)</td></tr>
+      <tr><td><code>==</code></td><td>равно</td></tr>
+      <tr><td><code>!=</code></td><td>не равно</td></tr>
+      <tr><td><code>&gt;</code></td><td>больше</td></tr>
+      <tr><td><code>&lt;</code></td><td>меньше</td></tr>
+      <tr><td><code>&gt;=</code></td><td>больше или равно</td></tr>
+      <tr><td><code>&lt;=</code></td><td>меньше или равно</td></tr>
+      <tr><td><code>True</code> / <code>False</code></td><td>истина / ложь — ответ условия</td></tr>
+      <tr><td><code>print("...")</code></td><td>вывести текст на экран</td></tr>
+      <tr><td><code>input("...")</code></td><td>спросить пользователя (ответ — строка!)</td></tr>
+      <tr><td><code>int(...)</code></td><td>превратить текст в целое число</td></tr>
+    </table>
+  </div>
+</aside>
+
+<div class="modal-bg hidden" id="certModal">
+  <div class="modal">
+    <div id="certContent"></div>
+  </div>
+</div>
+<canvas id="confetti"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* =====================================================================
+   ЗАДАНИЯ
+   ===================================================================== */
+const TASKS = [
+{
+  short:'Жарко!', title:'Задача 1: «Жарко!» — найди ошибку', goal:'Исправь ошибку, из-за которой программа не запускается',
+  story:'На метеостанции сломался датчик: программа должна предупредить «Жарко!», если температура выше 25 градусов. Но Python отказывается её запускать. Найди и исправь ошибку — и синоптики снова увидят предупреждение.',
+  reqs:['Запусти программу и прочитай сообщение об ошибке','Найди ошибку в строке с `if` и исправь её','Добейся, чтобы программа напечатала «Жарко!»'],
+  hints:['Python пишет про ошибку в записи программы. Посмотри на конец строки с `if`: чего там не хватает?','В конце строки с `if` обязательно ставится двоеточие. Должно получиться: `if temp > 25:`'],
+  starter:`#Программа должна напечатать "Жарко!", если температура больше 25
+
+temp = 30
+if temp > 25
+    print("Жарко!")
+`,
+  tests:[[]],
+  expected:[['Жарко!']],
+  check:(rs) => {
+    const r = rs[0];
+    if (r.error) return H.fail('В программе пока есть ошибка — прочитай подсказку под кодом и проверь строку с <code>if</code>.');
+    if (!H.has(r.output, 'жарко')) return H.fail('Программа запустилась, но не напечатала «Жарко!». Температура 30 — это больше 25? Значит, условие должно сработать.');
+    return H.ok('Точно! Ты поставил двоеточие — условие сработало, и программа напечатала «Жарко!» 🔥');
+  }
+},
+{
+  short:'Пароль', title:'Задача 3: «Пароль» — допиши программу', goal:'Допиши команду внутри if',
+  story:'Робот-сейф проверяет пароль. Если пароль верный, он должен открыть дверь и напечатать «Доступ открыт!». Условие уже написано — осталось добавить команду внутрь if.',
+  reqs:['Допиши внутри `if` команду `print("Доступ открыт!")`','Не забудь про отступ в 4 пробела — команда должна быть внутри `if`','Проверь решение: программа должна напечатать «Доступ открыт!»'],
+  hints:['Внутри `if` пишется команда, которая выполнится, только если условие истинно.','Добавь строку с отступом: `    print("Доступ открыт!")`'],
+  starter:`#Допиши программу: если пароль верный, выведи "Доступ открыт!"
+
+password = "1234"
+if password == "1234":
+    # твоя команда здесь
+`,
+  tests:[[]],
+  expected:[['Доступ открыт!']],
+  check:(rs, code) => {
+    const r = rs[0];
+    if (r.error) return H.fail('Пока ошибка. Проверь отступ: команда внутри <code>if</code> должна начинаться с 4 пробелов.');
+    if (!H.has(r.output, 'доступ открыт')) return H.fail('Программа запустилась, но не напечатала «Доступ открыт!». Добавь <code>print("Доступ открыт!")</code> внутрь <code>if</code> — с отступом.');
+    const inside = /(^|\n)[ \t]+print\s*\([^)]*Доступ открыт/i.test(code) || /:\s*print\s*\([^)]*Доступ открыт/i.test(code);
+    if (!inside) return H.fail('«Доступ открыт!» напечаталось, но команда стоит <b>вне</b> <code>if</code>. Сдвинь её вправо на 4 пробела — она должна выполняться внутри условия.');
+    return H.ok('Верно! Команда внутри if сработала, и сейф открылся 🔓');
+  }
+},
+{
+  short:'Мороженое', title:'Задача 5: «Мороженое» — напиши программу', goal:'Напиши программу-консультанта мороженого',
+  story:'В кафе «Python-пломбир» посетители выбирают вкус мороженого. Напиши программу-консультанта: если любимый вкус «ванильный» — рекомендуй пломбир, а в остальных случаях — шоколадное мороженое.',
+  reqs:['Спроси у посетителя любимый вкус через `input()`','Если вкус «ванильный» — напечатай рекомендацию пломбира','В остальных случаях — шоколадное мороженое','В уроке мы решали это двумя `if` — второй с оператором `!=`'],
+  hints:['Сначала получи ответ: `flavor = input("Какой у тебя любимый вкус? ")`','Первое условие: `if flavor == "ванильный":` — а второе: `if flavor != "ванильный":`','Не забудь отступы в 4 пробела и двоеточия в конце строк с `if`.'],
+  starter:`#Напиши программу-консультанта мороженого
+#Посетитель вводит любимый вкус.
+#Если вкус "ванильный" — рекомендуй "Пломбир".
+#В остальных случаях — "Шоколадное мороженое".
+
+flavor = input("Какой у тебя любимый вкус? ")
+# твой код здесь
+`,
+  tests:[['ванильный'], ['фисташковый']],
+  testLabels:['вкус: ванильный','вкус: фисташковый'],
+  expected:[['Рекомендую пломбир!'], ['Рекомендую шоколадное мороженое!']],
+  check:(rs) => {
+    const bad = rs.find(r => r.error);
+    if (bad) return H.fail('Программа где-то спотыкается: исправь ошибку под кодом и проверь отступы с двоеточиями.');
+    const vanilla = H.norm(rs[0] ? rs[0].output : '');
+    const other = H.norm(rs[1] ? rs[1].output : '');
+    if (!H.has(vanilla, 'пломбир') || H.has(vanilla, 'шоколад'))
+      return H.fail('Для вкуса «ванильный» программа должна рекомендовать <b>пломбир</b> (и только его). Проверь первое условие: <code>if flavor == "ванильный":</code>');
+    if (!H.has(other, 'шоколад') || H.has(other, 'пломбир'))
+      return H.fail('Для остальных вкусов должна быть рекомендация <b>шоколадного мороженого</b>. Проверь второе условие с оператором <code>!=</code>.');
+    return H.ok('Отлично! Обе ветки работают: ванильный → пломбир, остальные → шоколадное 🍦');
+  }
+},
+{
+  short:'Ошибки', title:'Задача 2: «Кино» — найди три ошибки', goal:'Исправь int(), двоеточие и отступ',
+  story:'Робот-кассир в кинотеатре должен пропустить на фильм школьника, если ему 12 лет или больше. Программа сломана сразу в трёх местах — проверь себя: ошибки бывают не только в условиях!',
+  reqs:['Запусти программу и исправляй ошибки по одной','Преврати возраст в число через `int()`','Поставь двоеточие после условия `if age >= 12:`','Сделай отступ у `print` — команда должна быть внутри `if`','Для возраста 14 — «Можно смотреть фильм», для 8 — ничего'],
+  hints:['Сначала исправь двоеточие после `if`, потом отступ у `print` — так Python начнёт читать программу дальше.','`input()` возвращает строку. Чтобы сравнивать с числом 12, нужно `age = int(input("Сколько тебе лет? "))`.','Итог: `if age >= 12:` и на следующей строке — `print("Можно смотреть фильм")` с отступом в 4 пробела.'],
+  starter:`#Программа спрашивает возраст и печатает "Можно смотреть фильм",
+#если возраст 12 или больше
+
+age = input("Сколько тебе лет? ")
+if age >= 12
+print("Можно смотреть фильм")
+`,
+  tests:[['14'], ['8']],
+  testLabels:['возраст: 14','возраст: 8'],
+  expected:[['Можно смотреть фильм'], []],
+  check:(rs) => {
+    const bad = rs.find(r => r.error);
+    if (bad) return H.fail('В программе ещё есть ошибка. Исправляй по одной: <code>int()</code> для возраста, двоеточие после <code>if</code> и отступ у <code>print</code>.');
+    const teen = H.norm(rs[0] ? rs[0].output : '');
+    const kid = H.norm(rs[1] ? rs[1].output : '');
+    if (!H.has(teen, 'можно смотреть')) return H.fail('Для возраста 14 программа должна напечатать «Можно смотреть фильм». Проверь условие и отступ.');
+    if (H.has(kid, 'можно смотреть')) return H.fail('Для возраста 8 фильм ещё нельзя — «Можно смотреть фильм» печататься не должно. Проверь условие <code>age &gt;= 12</code>.');
+    return H.ok('Все три ошибки найдены! Теперь робот-кассир правильно проверяет возраст 🎬');
+  }
+},
+{
+  short:'Мороз', title:'Задача 4: «Надень шапку» — допиши условие и команду', goal:'Напиши условие и команду внутри if',
+  story:'Метеоролог смотрит на термометр: если температура меньше 0, робот должен напомнить «Надень шапку!». Условия пока нет — напиши его сам, а внутри — нужную команду.',
+  reqs:['Допиши строку условия `if temp < 0:` — с двоеточием в конце','Внутри `if` напиши `print("Надень шапку!")` с отступом в 4 пробела','Для температуры −5 команда срабатывает, для 10 — нет'],
+  hints:['Условие «температура меньше 0» записывается так: `if temp < 0:` — не забудь двоеточие в конце.','Теперь команда внутри условия: на следующей строке с отступом в 4 пробела добавь `print("Надень шапку!")`.'],
+  starter:`#Допиши программу: если температура меньше 0, выведи "Надень шапку!"
+
+temp = int(input("Температура на улице: "))
+# напиши условие if и команду внутри него
+`,
+  tests:[['-5'], ['10']],
+  testLabels:['температура: −5','температура: 10'],
+  expected:[['Надень шапку!'], []],
+  check:(rs, code) => {
+    const bad = rs.find(r => r.error);
+    if (bad) return H.fail('Пока ошибка. Проверь двоеточие в конце условия и отступ у команды — 4 пробела.');
+    const hasIf = /(^|\n)\s*if\s+temp\s*<\s*0\s*:/.test(code) || /(^|\n)\s*if\s+0\s*>\s*temp\s*:/.test(code);
+    if (!hasIf) {
+      const anyIf = /(^|\n)\s*if\b[^\n]*:/.test(code);
+      return anyIf
+        ? H.fail('Условие есть, но оно не то. Нужно проверить, что температура <b>меньше 0</b>: <code>if temp &lt; 0:</code>.')
+        : H.fail('Сначала напиши строку условия: <code>if temp &lt; 0:</code> — с двоеточием в конце.');
+    }
+    const cold = H.norm(rs[0] ? rs[0].output : '');
+    const warm = H.norm(rs[1] ? rs[1].output : '');
+    if (!H.has(cold, 'шапку')) return H.fail('Для температуры −5 должно напечататься «Надень шапку!». Добавь <code>print("Надень шапку!")</code> внутрь <code>if</code> — с отступом.');
+    const inside = /(^|\n)[ \t]+print\s*\([^)]*шапку/i.test(code) || /:\s*print\s*\([^)]*шапку/i.test(code);
+    if (!inside) return H.fail('Команда стоит <b>вне</b> <code>if</code>. Сдвинь её вправо на 4 пробела — она должна выполняться внутри условия.');
+    if (H.has(warm, 'шапку')) return H.fail('Для температуры 10 мороза нет — «Надень шапку!» печататься не должно. Проверь условие: температура должна быть меньше 0.');
+    return H.ok('Верно! Условие написано тобой, и в мороз робот напомнит про шапку, а в тепло — промолчит ❄️');
+  }
+}
+];
+
+/* порядок задач в тренажёре: находим ошибку → ещё ошибки → дописываем → мороз → своя программа */
+const TASK_ORDER = ['Жарко!','Ошибки','Пароль','Мороз','Мороженое'];
+TASKS.sort((a, b) => TASK_ORDER.indexOf(a.short) - TASK_ORDER.indexOf(b.short));
+
+const QUIZ = [
+  {topic:'Сравнение', q:'Какой знак в Python означает «равно»?',
+   a:['<code>=</code>','<code>==</code>','<code>===</code>','<code>=&gt;</code>'], ok:1,
+   ex:'<code>==</code> — равно (проверка на равенство). А один знак <code>=</code> — это присваивание: <code>x = 5</code>.'},
+  {topic:'Оператор if', q:'Что напечатает программа?',
+   code:'x = 5\nif x > 3:\n    print("Да")',
+   a:['<code>Да</code>','Ничего не напечатает','<code>Ошибку</code>','<code>5</code>'], ok:0,
+   ex:'Условие <code>5 &gt; 3</code> истинно (True), поэтому выполняется команда внутри <code>if</code> — печатается «Да».'},
+  {topic:'Синтаксис', q:'Что обязательно ставится в конце строки с if?',
+   a:['Точка с запятой <code>;</code>','Двоеточие <code>:</code>','Закрывающая скобка <code>)</code>','Ничего не нужно'], ok:1,
+   ex:'Строка с <code>if</code> заканчивается двоеточием <code>:</code>, а команды внутри пишутся с отступом в 4 пробела.'},
+  {topic:'Результат программы', q:'Что выведет программа?',
+   code:'x = 7\nif x > 10:\n    print("Много")\nprint("Проверка")',
+   a:['<code>Много</code> и <code>Проверка</code>','Только <code>Проверка</code>','Только <code>Много</code>','Программа ничего не выведет'], ok:1,
+   ex:'<code>7 &gt; 10</code> — ложь, поэтому команда внутри <code>if</code> пропускается. А <code>print("Проверка")</code> стоит без отступа — он выполняется всегда.'}
+];
+
+const HELPERS = ['print("Привет!")','input("Вопрос: ")','int()','if x > 0:','if x == 5:','if x != 5:','True','False'];
+const XP_MISSION = 20, XP_QUIZ = 5;
+
+/* =====================================================================
+   СОСТОЯНИЕ
+   ===================================================================== */
+const KEY = 'python_start_lesson3_task2_v2';
+function defaults(){ return {tab:'quiz', cur:0, xp:0, done:{}, code:{}, hints:{}, quiz:{idx:0, answers:{}, xpGiven:{}, finished:false}, muted:false, font:15, name:'', scenario:{}}; }
+let state = defaults();
+try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s) state = Object.assign(defaults(), s); } catch(e) {}
+let saveTimer = 0;
+function save(){ clearTimeout(saveTimer); saveTimer = setTimeout(()=>{ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e) {} }, 150); }
+
+/* =====================================================================
+   ЗАПУСК PYTHON (Skulpt)
+   ===================================================================== */
+const PY_OK = typeof Sk !== 'undefined';
+function skRead(x){
+  if (Sk.builtinFiles === undefined || Sk.builtinFiles.files[x] === undefined) throw "File not found: '" + x + "'";
+  return Sk.builtinFiles.files[x];
+}
+let runChain = Promise.resolve();
+function runPy(code, inputs){
+  const p = runChain.then(() => runPyNow(code, inputs));
+  runChain = p.catch(() => {});
+  return p;
+}
+async function runPyNow(code, inputs){
+  let out = '';
+  if (!PY_OK) return {output:'', error:{custom:true, title:'Python не загрузился', text:'Для работы тренажёра нужен интернет: Python подключается из сети. Проверь подключение и обнови страницу.'}};
+  const savedPrompt = window.prompt;
+  const queue = (inputs || []).slice();
+  window.prompt = function(){ return queue.length ? queue.shift() : ''; };
+  Sk.configure({output: s => { out += s; }, read: skRead, __future__: Sk.python3, execLimit: 6000, yieldLimit: 100});
+  try {
+    Sk.execStart = Date.now();
+    await Sk.misceval.asyncToPromise(() => Sk.importMainWithBody('<stdin>', false, code, true));
+    return {output: out, error: null};
+  } catch (e) {
+    return {output: out, error: e};
+  } finally {
+    window.prompt = savedPrompt;
+  }
+}
+
+const BUILTINS = new Set(['print','input','int','str','float','len','abs','round','range','bool']);
+function friendlyError(e, code){
+  if (e && e.custom) return {title:e.title, text:e.text, raw:'', line:null};
+  let type = (e && e.tp$name) || 'Error', msg = '';
+  try { msg = e.args && e.args.v && e.args.v.length ? String(Sk.ffi.remapToJs(e.args.v[0])) : String(e); } catch (x) { msg = String(e); }
+  let line = null;
+  try { if (e.traceback && e.traceback.length) line = e.traceback[0].lineno; } catch (x) {}
+  if (!line) { const m = /line (\d+)/.exec(msg); if (m) line = +m[1]; }
+  if (line && /SyntaxError|ParseError|TokenError/.test(type)) {
+    const ls = code.split('\n');
+    for (let k = Math.min(line, ls.length); k >= 1; k--) {
+      if ((ls[k - 1].match(/\(/g) || []).length > (ls[k - 1].match(/\)/g) || []).length) { line = k; break; }
+    }
+  }
+  let emptyBlock = false, unindentedBlock = false;
+  if (/SyntaxError|ParseError|TokenError/.test(type)) {
+    const ls = code.split('\n');
+    for (let k = Math.max(1, Math.min(line || 1, ls.length)); k >= 1; k--) {
+      const mh = /^(\s*)(if|elif|else|for|while|def)\b.*:\s*(#.*)?$/.exec(ls[k - 1]);
+      if (!mh) continue;
+      let j = k;
+      while (j < ls.length && (/^\s*$/.test(ls[j]) || /^\s*#/.test(ls[j]))) j++;
+      const body = ls[j] || '';
+      if (body === '') emptyBlock = true;
+      else if ((body.match(/^\s*/) || [''])[0].length <= mh[1].length) unindentedBlock = true;
+      if (emptyBlock || unindentedBlock) line = k;
+      break;
+    }
+  }
+  const srcLine = line ? (code.split('\n')[line - 1] || '') : '';
+  const raw = type + ': ' + msg + (line ? ' (строка ' + line + ')' : '');
+  let text;
+  if (type === 'NameError') {
+    const m = /name '([^']+)'/.exec(msg); const w = m ? m[1] : '?';
+    if (BUILTINS.has(w.toLowerCase()) && w !== w.toLowerCase()) text = 'Python различает большие и маленькие буквы. Пиши <code>' + esc(w.toLowerCase()) + '</code>, а не <code>' + esc(w) + '</code>.';
+    else text = 'Python не знает слово <code>' + esc(w) + '</code>. Проверь, нет ли опечатки — и не забыл ли кавычки у текста.';
+  } else if (type === 'SyntaxError' || type === 'ParseError' || type === 'TokenError') {
+    const open = (srcLine.match(/\(/g) || []).length, close = (srcLine.match(/\)/g) || []).length;
+    if (emptyBlock)
+      text = 'Внутри <code>if</code> пока нет команды. Добавь её с отступом в 4 пробела, например: <code>print("Доступ открыт!")</code>.';
+    else if (unindentedBlock)
+      text = 'Команда после <code>if</code> написана без отступа. Сдвинь её вправо на 4 пробела — она должна быть внутри условия.';
+    else if (/^\s*(if|elif|else|for|while|def)\b/.test(srcLine) && !/:\s*(#.*)?$/.test(srcLine))
+      text = 'В конце строки с <code>if</code> нужно двоеточие <code>:</code>. Например: <code>if x &gt; 5:</code>';
+    else if (/^\s*if\b/.test(srcLine) && /[^=!<>]=[^=]/.test(srcLine))
+      text = 'Похоже, в условии стоит один знак <code>=</code>. Для проверки «равно» нужны два: <code>==</code>. Один <code>=</code> — это присваивание.';
+    else if (/[“”«»‘’]/.test(srcLine)) text = 'В строке «типографские» кавычки. Используй обычные <code>"</code>.';
+    else if (open > close) text = 'Не хватает закрывающей скобки <code>)</code>.';
+    else if (close > open) text = 'Лишняя закрывающая скобка <code>)</code> или не хватает открывающей <code>(</code>.';
+    else if ((srcLine.match(/"/g) || []).length % 2 || (srcLine.match(/'/g) || []).length % 2) text = 'Кавычка открыта, но не закрыта. Проверь пару кавычек <code>" "</code>.';
+    else text = 'Ошибка в записи программы. Проверь скобки <code>( )</code>, кавычки <code>" "</code>, двоеточия и знаки сравнения.';
+  } else if (type === 'IndentationError') {
+    if (/expected an indented block|expected an indented/i.test(msg))
+      text = 'Внутри <code>if</code> пока нет команды. Добавь её с отступом в 4 пробела, например: <code>print("Доступ открыт!")</code>.';
+    else if (/unexpected indent/i.test(msg))
+      text = 'Лишний отступ. Команда сдвинута вправо, хотя не должна быть внутри <code>if</code>.';
+    else
+      text = 'Проблема с отступами. Команды внутри <code>if</code> пишутся с отступом в 4 пробела, а остальные — с самого края.';
+  } else if (type === 'TypeError' && /not supported between/.test(msg)) {
+    text = 'Нельзя сравнить число и текст. Убери кавычки у числа или преврати текст в число через <code>int()</code>.';
+  } else if (type === 'ValueError' && /invalid literal for int/.test(msg)) {
+    text = '<code>int()</code> умеет превращать только записи чисел. Если пользователь ввёл текст, получится ошибка.';
+  } else if (type === 'TimeLimitError') {
+    text = 'Программа работает слишком долго. Может быть, получился бесконечный цикл?';
+  } else if (type === 'ImportError' || type === 'ModuleNotFoundError') {
+    text = 'Такого модуля нет. В этом задании модули подключать не нужно.';
+  } else {
+    text = 'В программе ошибка. Прочитай сообщение ниже и проверь эту строку.';
+  }
+  return {title:'Ошибка' + (line ? ' в строке ' + line : ''), text, raw, line};
+}
+
+/* =====================================================================
+   ПРОВЕРКА ОТВЕТОВ
+   ===================================================================== */
+const H = {
+  norm(s){ return String(s == null ? '' : s).replace(/\r/g,'').split('\n').map(l => l.replace(/\s+$/,'')).filter(l => l !== '').join('\n').trim(); },
+  has(out, frag){ return H.norm(out).toLowerCase().includes(String(frag).toLowerCase()); },
+  ok(msg){ return {ok:true, msg:msg || ''}; },
+  fail(msg){ return {ok:false, msg}; }
+};
+
+/* =====================================================================
+   РЕДАКТОР КОДА
+   ===================================================================== */
+const ta = $('#code'), hl = $('#hl'), gutter = $('#gutter');
+const KW = new Set(['from','import','for','in','range','if','elif','else','while','def','return','True','False','None','and','or','not','as','break','continue','pass']);
+let errLine = null;
+function highlightLine(src){
+  const re = /(#.*$)|("[^"]*"?|'[^']*'?)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_Ѐ-ӿ][\wЀ-ӿ]*)|([\s\S])/g;
+  let out = '', m;
+  while ((m = re.exec(src))) {
+    if (m[1]) out += `<span class="t-com">${esc(m[1])}</span>`;
+    else if (m[2]) out += `<span class="t-str">${esc(m[2])}</span>`;
+    else if (m[3]) out += `<span class="t-num">${m[3]}</span>`;
+    else if (m[4]) {
+      const w = m[4], next = src.slice(re.lastIndex).match(/^\s*\(/);
+      if (KW.has(w)) out += `<span class="t-kw">${w}</span>`;
+      else if (BUILTINS.has(w)) out += `<span class="t-fn">${w}</span>`;
+      else if (next) out += `<span class="t-call">${esc(w)}</span>`;
+      else out += esc(w);
+    } else out += esc(m[5]);
+  }
+  return out;
+}
+function refreshEditor(){
+  const lines = ta.value.split('\n');
+  hl.innerHTML = lines.map((l, i) => i + 1 === errLine ? `<span class="errline">${highlightLine(l) || '​'}</span>` : highlightLine(l)).join('\n') + '\n';
+  gutter.innerHTML = lines.map((_, i) => i + 1 === errLine ? `<span class="e">${i + 1}</span>` : String(i + 1)).join('\n') + '\n';
+  $('#lineCount').textContent = 'Строк: ' + lines.length;
+  syncScroll();
+}
+function syncScroll(){ hl.scrollTop = ta.scrollTop; hl.scrollLeft = ta.scrollLeft; gutter.scrollTop = ta.scrollTop; }
+function insertText(text){
+  ta.focus();
+  if (!document.execCommand || !document.execCommand('insertText', false, text)) {
+    const s = ta.selectionStart; ta.setRangeText(text, s, ta.selectionEnd, 'end'); ta.dispatchEvent(new Event('input'));
+  }
+}
+ta.addEventListener('input', () => {
+  errLine = null; refreshEditor();
+  state.code[state.cur] = ta.value; save();
+});
+ta.addEventListener('scroll', syncScroll);
+ta.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); doRun(false); return; }
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const v = ta.value, s = ta.selectionStart, ls = v.lastIndexOf('\n', s - 1) + 1;
+    if (e.shiftKey) {
+      const m = /^ {1,4}/.exec(v.slice(ls));
+      if (m) { ta.setSelectionRange(ls, ls + m[0].length); insertText(''); }
+    } else insertText('    ');
+    return;
+  }
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const v = ta.value, s = ta.selectionStart, ls = v.lastIndexOf('\n', s - 1) + 1, line = v.slice(ls, s);
+    let ind = /^\s*/.exec(line)[0];
+    if (/:\s*(#.*)?$/.test(line)) ind += '    ';
+    insertText('\n' + ind);
+  }
+});
+HELPERS.forEach(h => {
+  const b = document.createElement('button'); b.className = 'hchip'; b.textContent = h; b.title = 'Вставить в код';
+  b.onclick = () => {
+    const v = ta.value, s = ta.selectionStart, ls = v.lastIndexOf('\n', s - 1) + 1;
+    const lineBefore = v.slice(ls, s);
+    let t = h;
+    if (h.endsWith(':')) t = h + '\n' + /^\s*/.exec(lineBefore)[0] + '    ';
+    if (lineBefore.trim()) t = '\n' + /^\s*/.exec(lineBefore)[0] + t;
+    insertText(t); beep('click');
+  };
+  $('#helpers').appendChild(b);
+});
+function setFont(px){ state.font = Math.max(12, Math.min(22, px)); document.documentElement.style.setProperty('--code-size', state.font + 'px'); save(); }
+$('#fontMinus').onclick = () => setFont(state.font - 1);
+$('#fontPlus').onclick = () => setFont(state.font + 1);
+$('#resetCode').onclick = () => {
+  if (!confirm('Вернуть начальный код этой задачи? Твой код будет удалён.')) return;
+  ta.value = TASKS[state.cur].starter; state.code[state.cur] = ta.value; errLine = null; refreshEditor(); save();
+};
+
+/* =====================================================================
+   ТЕРМИНАЛ И ЗАПУСК
+   ===================================================================== */
+const con = $('#console'), verdictEl = $('#verdict');
+const MASCOT = (size = 64) => `<svg class="mascot" width="${size}" height="${size}" viewBox="0 0 64 64"><rect x="8" y="12" width="48" height="40" rx="10" fill="#20c997"/><rect x="14" y="20" width="36" height="24" rx="6" fill="#0f1b33"/><circle cx="23" cy="32" r="3.5" fill="#69f0ae"/><circle cx="32" cy="32" r="3.5" fill="#ffd43b"/><circle cx="41" cy="32" r="3.5" fill="#ff8fa3"/><rect x="24" y="54" width="16" height="3" rx="1.5" fill="#0ca678"/></svg>`;
+function conPlaceholder(){
+  con.innerHTML = `<div class="placeholder">${MASCOT(52)}<div>Нажми «<b style="color:#8fd4ff">▶ Запустить код</b>» или «<b style="color:#7cf0c4">✔ Проверить решение</b>».<br><span class="muted">Здесь появится то, что напечатает программа, и результат проверки.</span></div></div>`;
+}
+function conClear(){ con.innerHTML = ''; verdictEl.innerHTML = ''; }
+function conLine(html){ const d = document.createElement('div'); d.innerHTML = html; con.appendChild(d); con.scrollTop = con.scrollHeight; return d; }
+function renderOutput(r, code){
+  if (r.output) {
+    r.output.replace(/\r/g,'').replace(/\n$/,'').split('\n').forEach(l => conLine(`<span class="op">&gt;</span>${esc(l)}`));
+  }
+  if (r.error) {
+    const f = friendlyError(r.error, code);
+    if (f.line) { errLine = f.line; refreshEditor(); }
+    conLine(`<div class="errbox"><b>🐞 ${esc(f.title)}</b><div>${f.text}</div>${f.raw ? `<div class="raw">${esc(f.raw)}</div>` : ''}</div>`);
+    return f;
+  }
+  if (!r.output) conLine(`<span class="t-info">(программа ничего не напечатала)</span>`);
+  return null;
+}
+
+let busy = false, runToken = 0;
+function setBusy(b){ busy = b; $('#runBtn').disabled = $('#checkBtn').disabled = b; }
+function testSet(ti, k){
+  const t = TASKS[ti], tests = (t.tests && t.tests.length) ? t.tests : [[]];
+  return tests[Math.min(k, tests.length - 1)];
+}
+function scenarioIdx(ti){
+  const t = TASKS[ti], n = (t.tests && t.tests.length) || 1;
+  return Math.min(Math.max(+(state.scenario[ti] || 0), 0), n - 1);
+}
+
+async function doRun(isCheck){
+  if (busy) return;
+  setBusy(true);
+  const my = ++runToken, ti = state.cur, code = ta.value, t = TASKS[ti];
+  state.code[ti] = code; save();
+  conClear(); errLine = null; refreshEditor();
+  conLine(`<span class="t-info">⏳ ${isCheck ? 'Проверяю решение…' : 'Python выполняет программу…'}</span>`);
+
+  let results = [], labels = [];
+  try {
+    if (isCheck) {
+      const tests = (t.tests && t.tests.length) ? t.tests : [[]];
+      for (let k = 0; k < tests.length; k++) {
+        results.push(await runPy(code, tests[k].slice()));
+        labels.push((t.testLabels && t.testLabels[k]) || '');
+      }
+    } else {
+      const k = scenarioIdx(ti);
+      results.push(await runPy(code, testSet(ti, k).slice()));
+      labels.push((t.testLabels && t.testLabels[k]) || '');
+    }
+  } finally {
+    setBusy(false);
+  }
+  if (my !== runToken) return;
+
+  conClear();
+  results.forEach((r, k) => {
+    if (results.length > 1) conLine(`<span class="t-label">▶ ${esc(labels[k] || ('проверка ' + (k + 1)))}</span>`);
+    renderOutput(r, code);
+    if (k < results.length - 1) conLine(`<span class="t-sep"></span>`);
+  });
+  if (!isCheck) {
+    if (!results[0].error) conLine(`<span class="t-ok">✅ Программа выполнена! Если всё верно — нажми «✔ Проверить решение».</span>`);
+    return;
+  }
+  let v;
+  try { v = t.check(results, code); } catch (e) { v = H.fail('Не получилось проверить: ' + esc(e.message)); }
+  showVerdict(ti, v);
+}
+
+const PRAISE = ['Отлично! Всё работает как надо! 🎉','Супер! Ты справился с задачей! 🌟','Великолепно! Условие сработало идеально! 🚀','Ура! Заказчик будет доволен! 🏆'];
+function showVerdict(ti, v){
+  verdictEl.innerHTML = '';
+  if (v.ok) {
+    const first = !state.done[ti];
+    if (first) { state.done[ti] = true; state.xp += XP_MISSION; save(); updateHeader(); renderMissions(); }
+    const nextIdx = TASKS.findIndex((t, i) => i > ti && !state.done[i]);
+    const allDone = TASKS.every((t, i) => state.done[i]);
+    verdictEl.innerHTML = `<div class="fb good">${MASCOT(56)}<div><h4>🎉 Задача выполнена!${first ? ` +${XP_MISSION} XP` : ''}</h4><p>${v.msg || PRAISE[Math.floor(Math.random() * PRAISE.length)]}</p>
+      ${allDone ? `<button class="btn green" onclick="openCert()">🏅 Получить сертификат</button>` : nextIdx >= 0 ? `<button class="btn green" onclick="selectMission(${nextIdx})">Следующая задача →</button>` : ''}</div></div>`;
+    confetti(); beep('good');
+  } else {
+    verdictEl.innerHTML = `<div class="fb bad"><div style="font-size:40px;line-height:1">🤔</div><div><h4>Пока не получилось</h4><p>${v.msg}</p><button class="small" onclick="openDrawer()">💡 Открыть подсказки</button></div></div>`;
+    beep('bad');
+  }
+}
+$('#runBtn').onclick = () => doRun(false);
+$('#checkBtn').onclick = () => doRun(true);
+
+/* =====================================================================
+   МИССИИ
+   ===================================================================== */
+function renderMissions(){
+  const L = $('#mList'); L.innerHTML = '';
+  TASKS.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (i === state.cur ? ' on' : '') + (state.done[i] ? ' done' : '');
+    b.innerHTML = `<span class="n">${state.done[i] ? '✓' : i + 1}</span>${esc(t.short)}`;
+    b.onclick = () => selectMission(i);
+    L.appendChild(b);
+  });
+  const on = L.querySelector('.on'); if (on) on.scrollIntoView({block:'nearest', inline:'nearest'});
+}
+function renderScenario(){
+  const t = TASKS[state.cur], sel = $('#scenario');
+  sel.innerHTML = '';
+  if (!t.tests || t.tests.length < 2) { sel.classList.add('hidden'); return; }
+  t.testLabels.forEach((l, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${esc(l)}</option>`));
+  sel.value = String(scenarioIdx(state.cur));
+  sel.classList.remove('hidden');
+}
+function selectMission(i, keepTab){
+  state.cur = i; save();
+  const t = TASKS[i];
+  $('#mTitle').textContent = t.title; $('#mGoal').textContent = t.goal;
+  ta.value = state.code[i] != null ? state.code[i] : t.starter;
+  errLine = null; refreshEditor(); ta.scrollTop = 0; syncScroll();
+  renderMissions(); renderScenario(); renderDrawer();
+  runToken++; conPlaceholder(); verdictEl.innerHTML = '';
+  if (!keepTab && state.tab !== 'code') setTab('code');
+}
+window.selectMission = selectMission;
+
+/* ---- drawer ---- */
+function renderDrawer(){
+  const t = TASKS[state.cur], used = state.hints[state.cur] || 0;
+  $('#drTitle').textContent = t.title;
+  $('#drStory').textContent = t.story;
+  $('#drReqs').innerHTML = t.reqs.map(r => `<li>${r}</li>`).join('');
+  $('#drExpected').innerHTML = (t.expected || []).map((lines, i) => {
+    const lbl = t.testLabels && t.testLabels[i] ? `<div class="exp-lbl">${esc(t.testLabels[i])}</div>` : '';
+    const body = lines.length ? lines.map(l => `<div class="exp-line"><span class="op">&gt;</span>${esc(l)}</div>`).join('')
+      : `<div class="exp-line"><span class="op">&gt;</span><span style="color:#9fb3d1">(ничего не печатается)</span></div>`;
+    return lbl + body;
+  }).join('');
+  $('#drHints').innerHTML = used ? t.hints.slice(0, used).map((h, k) => `<div class="hint"><b>Подсказка ${k + 1}:</b> ${h}</div>`).join('') : '<div class="muted" style="font-size:14px">Сначала попробуй сам! Если застрял — открой подсказку.</div>';
+  $('#moreHint').classList.toggle('hidden', used >= t.hints.length);
+  $('#moreHint').textContent = `💡 Показать подсказку (${used}/${t.hints.length})`;
+}
+function openDrawer(){ renderDrawer(); $('#drawer').classList.add('on'); $('#drBg').classList.add('on'); }
+function closeDrawer(){ $('#drawer').classList.remove('on'); $('#drBg').classList.remove('on'); }
+window.openDrawer = openDrawer;
+$('#openTask').onclick = openDrawer; $('#sideTab').onclick = openDrawer;
+$('#drClose').onclick = closeDrawer; $('#drBg').onclick = closeDrawer;
+$('#moreHint').onclick = () => { state.hints[state.cur] = (state.hints[state.cur] || 0) + 1; save(); renderDrawer(); beep('click'); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); $('#certModal').classList.add('hidden'); } });
+
+/* =====================================================================
+   ТЕСТ
+   ===================================================================== */
+function quizScore(){ return QUIZ.reduce((s, q, i) => s + (state.quiz.answers[i] === q.ok ? 1 : 0), 0); }
+function renderQuiz(){
+  const Q = state.quiz, n = QUIZ.length;
+  $('#qScore').textContent = quizScore();
+  $('#qDots').innerHTML = QUIZ.map((q, i) => {
+    const a = Q.answers[i]; const cls = a == null ? (i === Q.idx && !Q.finished ? 'cur' : '') : (a === q.ok ? 'ok' : 'bad');
+    return `<i class="${cls}"></i>`;
+  }).join('');
+  if (Q.finished) {
+    $('#qBody').classList.add('hidden'); $('#qFinish').classList.remove('hidden');
+    $('#qNum').textContent = '✓'; $('#qLabel').textContent = 'ТЕСТ ПРОЙДЕН';
+    const sc = quizScore();
+    $('#qFinish').innerHTML = `${MASCOT(90)}<h2>${sc === n ? 'Идеально!' : sc >= n / 2 ? 'Хороший результат!' : 'Неплохое начало!'}</h2>
+      <div class="big">${sc} / ${n}</div><p class="muted">правильных ответов</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px">
+      <button class="btn white" id="qAgain">↺ Пройти ещё раз</button><button class="btn green" id="qGo">Перейти к практике →</button></div>`;
+    $('#qAgain').onclick = () => { state.quiz = {idx:0, answers:{}, xpGiven: state.quiz.xpGiven || {}, finished:false}; save(); renderQuiz(); };
+    $('#qGo').onclick = () => setTab('code');
+    return;
+  }
+  $('#qBody').classList.remove('hidden'); $('#qFinish').classList.add('hidden');
+  const i = Q.idx, q = QUIZ[i], a = Q.answers[i];
+  $('#qNum').textContent = i + 1; $('#qLabel').textContent = `ВОПРОС ${i + 1} ИЗ ${n}`;
+  $('#qTopic').textContent = '❓ Тема: ' + q.topic;
+  $('#qText').innerHTML = esc(q.q) + (q.code ? `<pre style="font-family:'JetBrains Mono',monospace;font-size:15px;background:#0f1b33;color:#d8f5e6;padding:14px 16px;border-radius:14px;margin:14px 0 0;white-space:pre-wrap">${esc(q.code)}</pre>` : '');
+  $('#qOpts').innerHTML = q.a.map((t, k) => {
+    let cls = 'opt'; if (a != null) { if (k === q.ok) cls += ' ok'; else if (k === a) cls += ' bad'; }
+    return `<button class="${cls}" data-k="${k}" ${a != null ? 'disabled' : ''}><span class="let">${'ABCD'[k]}</span><span>${t}</span></button>`;
+  }).join('');
+  $('#qOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => answerQuiz(+b.dataset.k));
+  const R = $('#qRight');
+  if (a == null) R.innerHTML = `${MASCOT(90)}<h3>Нажми на ответ, который считаешь правильным</h3><p class="muted">Здесь появится результат и объяснение</p>`;
+  else {
+    const good = a === q.ok;
+    R.innerHTML = `<div style="font-size:54px">${good ? '🎉' : '🙈'}</div><h3 style="color:${good ? 'var(--green-d)' : 'var(--red)'}">${good ? 'Правильно!' + (Q.xpGiven && Q.xpGiven[i] === 'now' ? ` +${XP_QUIZ} XP` : '') : 'Не совсем…'}</h3><p>${q.ex}</p>
+      <button class="btn green" id="qNext">${i + 1 < n ? 'Следующий вопрос →' : 'Завершить тест ✓'}</button>`;
+    $('#qNext').onclick = () => { if (i + 1 < n) Q.idx++; else Q.finished = true; save(); renderQuiz(); };
+  }
+}
+function answerQuiz(k){
+  const Q = state.quiz, i = Q.idx; if (Q.answers[i] != null) return;
+  Q.answers[i] = k; Q.xpGiven = Q.xpGiven || {};
+  for (const j in Q.xpGiven) if (Q.xpGiven[j] === 'now') Q.xpGiven[j] = true;
+  if (k === QUIZ[i].ok) { if (!Q.xpGiven[i]) { Q.xpGiven[i] = 'now'; state.xp += XP_QUIZ; updateHeader(); } beep('good'); } else beep('bad');
+  save(); renderQuiz();
+}
+$('#toCode').onclick = () => setTab('code');
+
+/* =====================================================================
+   ОБЩЕЕ
+   ===================================================================== */
+function setTab(tab){
+  state.tab = tab; save();
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  $('#quizView').classList.toggle('hidden', tab !== 'quiz');
+  $('#codeView').classList.toggle('hidden', tab !== 'code');
+  $('#sideTab').classList.toggle('hidden', tab !== 'code');
+  if (tab === 'code') renderScenario(); else renderQuiz();
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+function updateHeader(){
+  $('#xp').textContent = state.xp;
+  $('#doneCount').textContent = TASKS.filter((t, i) => state.done[i]).length;
+  $('#totalCount').textContent = TASKS.length;
+  $('#soundBtn').textContent = state.muted ? '🔇' : '🔊';
+}
+$('#soundBtn').onclick = () => { state.muted = !state.muted; save(); updateHeader(); };
+$('#resetAll').onclick = () => {
+  if (!confirm('Начать всё заново? Весь прогресс, XP и код будут удалены.')) return;
+  state = defaults(); try { localStorage.removeItem(KEY); } catch (e) {}
+  init();
+};
+$('#scenario').onchange = e => { state.scenario[state.cur] = +e.target.value; save(); if (!busy) doRun(false); };
+
+let actx = null;
+function beep(kind){
+  if (state.muted) return;
+  const seq = {good:[[523, .1], [659, .1], [784, .18]], bad:[[330, .12], [247, .2]], click:[[880, .04]]}[kind];
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    let t = actx.currentTime;
+    seq.forEach(([f, d]) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = 'triangle'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(kind === 'click' ? 0.05 : 0.14, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      o.connect(g).connect(actx.destination); o.start(t); o.stop(t + d + 0.03); t += d * 0.85;
+    });
+  } catch (e) {}
+}
+
+function confetti(){
+  const c = $('#confetti'), x = c.getContext('2d'); c.width = innerWidth; c.height = innerHeight;
+  const cols = ['#20c997', '#ffc53d', '#7c4dff', '#ff6b6b', '#4dabf7', '#ff922b'];
+  const ps = Array.from({length:150}, () => ({x:innerWidth / 2, y:innerHeight / 3, vx:(Math.random() - .5) * 16, vy:-Math.random() * 13 - 3, s:Math.random() * 8 + 5, c:cols[Math.floor(Math.random() * cols.length)], r:Math.random() * 6, vr:(Math.random() - .5) * .4}));
+  let f = 0;
+  (function tick(){
+    x.clearRect(0, 0, c.width, c.height);
+    ps.forEach(p => { p.vy += .32; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); x.restore(); });
+    if (++f < 170) requestAnimationFrame(tick); else x.clearRect(0, 0, c.width, c.height);
+  })();
+}
+
+function openCert(){
+  const done = TASKS.filter((t, i) => state.done[i]).length, n = TASKS.length, M = $('#certContent');
+  if (done < n) {
+    M.innerHTML = `<h3>🏅 Сертификат</h3><p>Сертификат откроется, когда ты выполнишь все задания практики (${n}).</p>
+      <div class="progressbar"><i style="width:${done / n * 100}%"></i></div><p><b>${done} из ${n}</b> задач выполнено. Осталось совсем чуть-чуть! 💪</p>
+      <div style="text-align:right;margin-top:14px"><button class="btn green" id="certClose">Продолжить обучение</button></div>`;
+  } else {
+    const date = new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
+    M.innerHTML = `<h3>🏅 Твой сертификат</h3><label class="muted" for="certName">Впиши своё имя:</label><input id="certName" maxlength="40" placeholder="Имя и фамилия" value="${esc(state.name || '')}">
+      <div class="cert" id="certPrint"><div class="ct">СЕРТИФИКАТ</div><div style="margin:8px 0">${MASCOT(70)}</div><p>подтверждает, что</p>
+      <div class="name" id="certNameOut">${esc(state.name || '______________')}</div>
+      <p>успешно прошёл(ла) урок <b>«Условный оператор»</b><br>и выполнил(а) все задания практики по Python</p>
+      <h2>⭐ ${state.xp} XP</h2><p>Тест: ${quizScore()} из ${QUIZ.length} · ${date}</p></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap"><button class="btn white" id="certClose">Закрыть</button><button class="btn green" id="certPrintBtn">🖨️ Распечатать</button></div>`;
+    $('#certName').oninput = e => { state.name = e.target.value; save(); $('#certNameOut').textContent = state.name || '______________'; };
+    $('#certPrintBtn').onclick = () => window.print();
+    confetti();
+  }
+  $('#certClose').onclick = () => $('#certModal').classList.add('hidden');
+  $('#certModal').classList.remove('hidden');
+}
+window.openCert = openCert;
+$('#certBtn').onclick = openCert;
+$('#certModal').onclick = e => { if (e.target.id === 'certModal') $('#certModal').classList.add('hidden'); };
+
+/* =====================================================================
+   СТАРТ
+   ===================================================================== */
+function init(){
+  setFont(state.font);
+  updateHeader();
+  selectMission(Math.min(state.cur, TASKS.length - 1), true);
+  setTab(state.tab);
+  renderQuiz();
+  if (!state.tab) setTab('quiz');
+}
+init();
+if (!PY_OK) conLine(`<div class="errbox"><b>⚠️ Python не загрузился</b><div>Для работы тренажёра нужен интернет. Проверь подключение и обнови страницу.</div></div>`);
+</script>
+</body>
+</html>
